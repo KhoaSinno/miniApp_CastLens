@@ -1,4 +1,7 @@
+"use client";
+
 import { useState } from "react";
+import { Button } from "./DemoComponents";
 
 interface TranslationResult {
   translated?: string;
@@ -19,6 +22,32 @@ type Result = TranslationResult | ExplanationResult | null;
 
 interface TranslatorProps {
   onBack: () => void;
+}
+
+// Card component matching DemoComponents style
+function Card({
+  title,
+  children,
+  className = "",
+}: {
+  title?: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={`bg-[var(--app-card-bg)] backdrop-blur-md rounded-xl shadow-lg border border-[var(--app-card-border)] overflow-hidden transition-all hover:shadow-xl ${className}`}
+    >
+      {title && (
+        <div className="px-5 py-3 border-b border-[var(--app-card-border)]">
+          <h3 className="text-lg font-medium text-[var(--app-foreground)]">
+            {title}
+          </h3>
+        </div>
+      )}
+      <div className="p-5">{children}</div>
+    </div>
+  );
 }
 
 export function Translator({ onBack }: TranslatorProps) {
@@ -53,47 +82,42 @@ export function Translator({ onBack }: TranslatorProps) {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold">🌐 CastLens Translator</h2>
-        <button
-          onClick={onBack}
-          className="text-[var(--app-accent)] hover:underline"
-        >
+    <div className="space-y-6 animate-fade-in">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-bold text-[var(--app-foreground)]">
+          🌐 CastLens Translator
+        </h2>
+        <Button variant="ghost" size="sm" onClick={onBack}>
           ← Back
-        </button>
+        </Button>
       </div>
 
-      <div className="space-y-3">
-        {/* Mode Selection */}
-        <div className="flex space-x-2">
-          <button
+      {/* Mode Selection Card */}
+      <Card title="Choose Mode">
+        <div className="grid grid-cols-2 gap-3">
+          <Button
+            variant={mode === "translate" ? "primary" : "outline"}
             onClick={() => setMode("translate")}
-            className={`px-4 py-2 rounded-lg flex-1 text-sm font-medium transition-colors ${
-              mode === "translate"
-                ? "bg-[var(--app-accent)] text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            }`}
+            className="w-full"
           >
-            😍 Translate to VI
-          </button>
-          <button
+            🔄 Translate to VI
+          </Button>
+          <Button
+            variant={mode === "explain" ? "primary" : "outline"}
             onClick={() => setMode("explain")}
-            className={`px-4 py-2 rounded-lg flex-1 text-sm font-medium transition-colors ${
-              mode === "explain"
-                ? "bg-[var(--app-accent)] text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            }`}
+            className="w-full"
           >
-            🤩 Explain (ELI5)
-          </button>
+            🤖 Explain (ELI5)
+          </Button>
         </div>
+      </Card>
 
-        {/* Input */}
-        <div>
-          <label className="block text-sm font-medium mb-2">
-            {mode === "translate" ? "Text to translate:" : "Text to explain:"}
-          </label>
+      {/* Input Card */}
+      <Card
+        title={mode === "translate" ? "Text to Translate" : "Text to Explain"}
+      >
+        <div className="space-y-4">
           <textarea
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
@@ -102,112 +126,126 @@ export function Translator({ onBack }: TranslatorProps) {
                 ? "Enter text to translate to Vietnamese..."
                 : "Enter text to explain in simple terms..."
             }
-            className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-[var(--app-accent)] focus:border-transparent"
+            className="w-full p-3 border border-[var(--app-card-border)] bg-[var(--app-background)] text-[var(--app-foreground)] rounded-lg resize-none focus:ring-2 focus:ring-[var(--app-accent)] focus:border-transparent"
             rows={4}
           />
-        </div>
 
-        {/* Action Button */}
-        <button
-          onClick={handleTranslate}
-          disabled={!inputText.trim() || loading}
-          className="w-full bg-[var(--app-accent)] text-white py-3 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-opacity-90 transition-colors"
-        >
-          {loading ? (
-            <span className="flex items-center justify-center space-x-2">
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              <span>Processing...</span>
-            </span>
-          ) : mode === "translate" ? (
-            "Translate"
-          ) : (
-            "Explain"
-          )}
-        </button>
-
-        {/* Result */}
-        {result && (
-          <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-            <h3 className="font-medium mb-2">
-              {mode === "translate" ? "Translation:" : "Explanation:"}
-            </h3>
-
-            {result.error ? (
-              <p className="text-red-600">{result.error}</p>
+          <Button
+            onClick={handleTranslate}
+            disabled={!inputText.trim() || loading}
+            className="w-full"
+          >
+            {loading ? (
+              <span className="flex items-center justify-center space-x-2">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <span>Processing...</span>
+              </span>
             ) : mode === "translate" ? (
-              <div className="space-y-2">
-                {(result as TranslationResult).unchanged ? (
-                  <p className="text-gray-600 italic">
-                    Text is already in Vietnamese or doesn&apos;t need
-                    translation.
-                  </p>
-                ) : (
-                  <p className="text-gray-800">
-                    {(result as TranslationResult).translated}
-                  </p>
-                )}
-                {(result as TranslationResult).notes?.length &&
-                  (result as TranslationResult).notes!.length > 0 && (
-                    <div className="text-sm text-gray-600">
-                      <strong>Notes:</strong>{" "}
-                      {(result as TranslationResult).notes!.join(", ")}
-                    </div>
-                  )}
-              </div>
+              "🔄 Translate"
             ) : (
-              <div className="space-y-3">
-                {(result as ExplanationResult).summary && (
-                  <div>
-                    <strong className="text-sm">Summary:</strong>
-                    <p className="text-gray-800">
-                      {(result as ExplanationResult).summary}
-                    </p>
-                  </div>
-                )}
-
-                {(result as ExplanationResult).eli5 && (
-                  <div>
-                    <strong className="text-sm">ELI5:</strong>
-                    <p className="text-gray-800">
-                      {(result as ExplanationResult).eli5}
-                    </p>
-                  </div>
-                )}
-
-                {(result as ExplanationResult).key_points?.length &&
-                  (result as ExplanationResult).key_points!.length > 0 && (
-                    <div>
-                      <strong className="text-sm">Key Points:</strong>
-                      <ul className="list-disc list-inside text-gray-800 space-y-1">
-                        {(result as ExplanationResult).key_points!.map(
-                          (point: string, idx: number) => (
-                            <li key={idx}>{point}</li>
-                          ),
-                        )}
-                      </ul>
-                    </div>
-                  )}
-
-                {(result as ExplanationResult).glossary?.length &&
-                  (result as ExplanationResult).glossary!.length > 0 && (
-                    <div>
-                      <strong className="text-sm">Glossary:</strong>
-                      <div className="space-y-1">
-                        {(result as ExplanationResult).glossary!.map(
-                          (item, idx: number) => (
-                            <div key={idx} className="text-sm">
-                              <strong>{item.term}:</strong> {item.meaning}
-                            </div>
-                          ),
-                        )}
-                      </div>
-                    </div>
-                  )}
-              </div>
+              "🤖 Explain"
             )}
-          </div>
-        )}
-      </div>
+          </Button>
+        </div>
+      </Card>
+
+      {/* Result Card */}
+      {result && (
+        <Card
+          title={
+            mode === "translate" ? "Translation Result" : "Explanation Result"
+          }
+        >
+          {result.error ? (
+            <div className="text-red-600 bg-red-50 p-3 rounded-lg">
+              <strong>Error:</strong> {result.error}
+            </div>
+          ) : mode === "translate" ? (
+            <div className="space-y-3">
+              {(result as TranslationResult).unchanged ? (
+                <div className="text-[var(--app-foreground-muted)] italic bg-[var(--app-gray)] p-3 rounded-lg">
+                  Text is already in Vietnamese or doesn&apos;t need
+                  translation.
+                </div>
+              ) : (
+                <div className="text-[var(--app-foreground)] bg-[var(--app-background)] p-3 rounded-lg border border-[var(--app-card-border)]">
+                  {(result as TranslationResult).translated}
+                </div>
+              )}
+              {(result as TranslationResult).notes?.length &&
+                (result as TranslationResult).notes!.length > 0 && (
+                  <div className="text-sm text-[var(--app-foreground-muted)] bg-[var(--app-gray)] p-3 rounded-lg">
+                    <strong>Notes:</strong>{" "}
+                    {(result as TranslationResult).notes!.join(", ")}
+                  </div>
+                )}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {(result as ExplanationResult).summary && (
+                <div className="bg-[var(--app-background)] p-3 rounded-lg border border-[var(--app-card-border)]">
+                  <strong className="text-sm text-[var(--app-accent)]">
+                    Summary:
+                  </strong>
+                  <p className="text-[var(--app-foreground)] mt-1">
+                    {(result as ExplanationResult).summary}
+                  </p>
+                </div>
+              )}
+
+              {(result as ExplanationResult).eli5 && (
+                <div className="bg-[var(--app-background)] p-3 rounded-lg border border-[var(--app-card-border)]">
+                  <strong className="text-sm text-[var(--app-accent)]">
+                    ELI5:
+                  </strong>
+                  <p className="text-[var(--app-foreground)] mt-1">
+                    {(result as ExplanationResult).eli5}
+                  </p>
+                </div>
+              )}
+
+              {(result as ExplanationResult).key_points?.length &&
+                (result as ExplanationResult).key_points!.length > 0 && (
+                  <div className="bg-[var(--app-background)] p-3 rounded-lg border border-[var(--app-card-border)]">
+                    <strong className="text-sm text-[var(--app-accent)]">
+                      Key Points:
+                    </strong>
+                    <ul className="list-disc list-inside text-[var(--app-foreground)] space-y-1 mt-1">
+                      {(result as ExplanationResult).key_points!.map(
+                        (point: string, idx: number) => (
+                          <li key={idx}>{point}</li>
+                        ),
+                      )}
+                    </ul>
+                  </div>
+                )}
+
+              {(result as ExplanationResult).glossary?.length &&
+                (result as ExplanationResult).glossary!.length > 0 && (
+                  <div className="bg-[var(--app-background)] p-3 rounded-lg border border-[var(--app-card-border)]">
+                    <strong className="text-sm text-[var(--app-accent)]">
+                      Glossary:
+                    </strong>
+                    <div className="space-y-2 mt-1">
+                      {(result as ExplanationResult).glossary!.map(
+                        (item, idx: number) => (
+                          <div key={idx} className="text-sm">
+                            <strong className="text-[var(--app-foreground)]">
+                              {item.term}:
+                            </strong>{" "}
+                            <span className="text-[var(--app-foreground-muted)]">
+                              {item.meaning}
+                            </span>
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  </div>
+                )}
+            </div>
+          )}
+        </Card>
+      )}
     </div>
   );
 }
