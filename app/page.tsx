@@ -23,13 +23,14 @@ import { Button } from "./components/DemoComponents";
 import { Icon } from "./components/DemoComponents";
 import { Home } from "./components/DemoComponents";
 import { Features } from "./components/DemoComponents";
-import { useAccount } from "wagmi";
+import { Translator } from "./components/Translator";
+// import { useAccount } from "wagmi";
 
 export default function App() {
   const { setFrameReady, isFrameReady, context } = useMiniKit();
   const [frameAdded, setFrameAdded] = useState(false);
   const [activeTab, setActiveTab] = useState("home");
-  const { isConnected, address } = useAccount();
+  // const { isConnected, address } = useAccount();
 
   const addFrame = useAddFrame();
   const openUrl = useOpenUrl();
@@ -102,6 +103,9 @@ export default function App() {
         <main className="flex-1">
           {activeTab === "home" && <Home setActiveTab={setActiveTab} />}
           {activeTab === "features" && <Features setActiveTab={setActiveTab} />}
+          {activeTab === "translator" && (
+            <Translator onBack={() => setActiveTab("home")} />
+          )}
         </main>
 
         <footer className="mt-2 pt-4 flex justify-center">
