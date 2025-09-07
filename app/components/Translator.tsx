@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "./DemoComponents";
+import { fetchCastByHash } from "@/lib/neynar";
 
 interface TranslationResult {
   translated?: string;
@@ -52,8 +53,11 @@ function Card({
 
 export function Translator({ onBack }: TranslatorProps) {
   const [inputText, setInputText] = useState("");
+  const [castHash, setCastHash] = useState("");
   const [result, setResult] = useState<Result>(null);
   const [loading, setLoading] = useState(false);
+  const [castRes, setCastRes] = useState<string>("");
+  // const [fetchingCast, setFetchingCast] = useState(false);
   const [mode, setMode] = useState<"translate" | "explain">("translate");
 
   const handleTranslate = async () => {
@@ -61,18 +65,39 @@ export function Translator({ onBack }: TranslatorProps) {
 
     setLoading(true);
     try {
-      const response = await fetch("/api/translate", {
+      const castResponse = await fetch("/api/fetch-cast", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          text: inputText,
-          mode,
-          targetLang: "vi",
-        }),
+        body: JSON.stringify({ castHash: castHash.trim() }),
       });
 
-      const data = await response.json();
-      setResult(data);
+      if (!castResponse.ok) {
+        const errText = await castResponse.text();
+        console.error("Fetch cast failed:", castResponse.status, errText);
+        setResult({ error: `Failed fetching cast: ${castResponse.status}` });
+        return;
+      }
+      
+      const data = await castResponse.json();
+
+      // set state and log the actual fetched value (not castRes which updates async)
+      const fetchedCast = data?.cast ?? JSON.stringify(data);
+      setCastRes(fetchedCast);
+      console.log("Fetched Cast (raw response):", data);
+      console.log("Fetched Cast Content:", fetchedCast);
+
+      // const response = await fetch("/api/translate", {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify({
+      //     text: inputText,
+      //     mode,
+      //     targetLang: "vi",
+      //   }),
+      // });
+
+      // const data = await response.json();
+      // setResult(data);
     } catch (error) {
       console.error("Translation error:", error);
       setResult({ error: "Translation failed" });
@@ -84,31 +109,37 @@ export function Translator({ onBack }: TranslatorProps) {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-center mb-4">
         <h2 className="text-xl font-bold text-[var(--app-foreground)]">
           🌐 CastLens Translator
         </h2>
-        {/* <Button variant="ghost" size="sm" onClick={onBack}>
-          ← Back
-        </Button> */}
       </div>
 
       {/* Mode Selection Card */}
-      <Card title="Choose Mode">
+      <Card title="Fetch Cast from Farcaster">
+        <div className="pb-3">
+          <input
+            type="text"
+            value={castHash}
+            onChange={(e) => setCastHash(e.target.value)}
+            placeholder="0x1d225d4dd118b2ba6a688e8b181b9aa57a396aa7"
+            className="w-full p-3 border border-[var(--app-card-border)] bg-[var(--app-background)] text-[var(--app-foreground)] rounded-lg focus:ring-2 focus:ring-[var(--app-accent)] focus:border-transparent"
+          />
+        </div>
         <div className="grid grid-cols-2 gap-3">
           <Button
             variant={mode === "translate" ? "primary" : "outline"}
             onClick={() => setMode("translate")}
             className="w-full"
           >
-            🔄 Translate to VI
+            😍 Translate to VI
           </Button>
           <Button
             variant={mode === "explain" ? "primary" : "outline"}
             onClick={() => setMode("explain")}
             className="w-full"
           >
-            🤖 Explain (ELI5)
+            🤩 Explain (ELI5)
           </Button>
         </div>
       </Card>
@@ -118,7 +149,7 @@ export function Translator({ onBack }: TranslatorProps) {
         title={mode === "translate" ? "Text to Translate" : "Text to Explain"}
       >
         <div className="space-y-4">
-          <textarea
+          {/* <textarea
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             placeholder={
@@ -128,11 +159,11 @@ export function Translator({ onBack }: TranslatorProps) {
             }
             className="w-full p-3 border border-[var(--app-card-border)] bg-[var(--app-background)] text-[var(--app-foreground)] rounded-lg resize-none focus:ring-2 focus:ring-[var(--app-accent)] focus:border-transparent"
             rows={4}
-          />
+          /> */}
 
           <Button
             onClick={handleTranslate}
-            disabled={!inputText.trim() || loading}
+            // disabled={!inputText.trim() || loading}
             className="w-full"
           >
             {loading ? (
