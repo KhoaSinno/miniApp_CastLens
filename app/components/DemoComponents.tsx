@@ -156,7 +156,7 @@ type HomeProps = {
 export function Home({ setActiveTab }: HomeProps) {
   return (
     <div className="space-y-6 animate-fade-in">
-      <Translator onBack={() => {}} />
+      <Translator />
       <Card title="🌐 CastLens Translator">
         <p className="text-[var(--app-foreground-muted)] mb-4">
           Translate and explain Farcaster content for Vietnamese users.
