@@ -20,10 +20,6 @@ interface ExplanationResult {
 
 type Result = TranslationResult | ExplanationResult | null;
 
-interface TranslatorProps {
-  onBack: () => void;
-}
-
 // Card component matching DemoComponents style
 function Card({
   title,
@@ -50,12 +46,10 @@ function Card({
   );
 }
 
-export function Translator({ onBack }: TranslatorProps) {
+export function Translator() {
   const [castHash, setCastHash] = useState("");
   const [result, setResult] = useState<Result>(null);
   const [loading, setLoading] = useState(false);
-  const [castRes, setCastRes] = useState<string>("");
-  // const [fetchingCast, setFetchingCast] = useState(false);
   const [mode, setMode] = useState<"translate" | "explain">("translate");
 
   const handleTranslate = async () => {
@@ -90,7 +84,6 @@ export function Translator({ onBack }: TranslatorProps) {
       console.log("Fetch cast response data:", dataRes.text);
 
       const fetchedCast = dataRes?.cast ?? JSON.stringify(dataRes);
-      setCastRes(fetchedCast);
 
       console.log("Fetched Cast:", fetchedCast.text);
 
