@@ -3,37 +3,35 @@
 import {
   useMiniKit,
   useAddFrame,
-  useOpenUrl,
+  // useOpenUrl,
 } from "@coinbase/onchainkit/minikit";
-import {
-  Name,
-  Identity,
-  Address,
-  Avatar,
-  EthBalance,
-} from "@coinbase/onchainkit/identity";
-import {
-  ConnectWallet,
-  Wallet,
-  WalletDropdown,
-  WalletDropdownDisconnect,
-} from "@coinbase/onchainkit/wallet";
+// import {
+//   Name,
+//   Identity,
+//   Address,
+//   Avatar,
+//   EthBalance,
+// } from "@coinbase/onchainkit/identity";
+// import {
+//   ConnectWallet,
+//   Wallet,
+//   WalletDropdown,
+//   WalletDropdownDisconnect,
+// } from "@coinbase/onchainkit/wallet";
+// import { Home } from "./components/DemoComponents";
+// import { Features } from "./components/DemoComponents";
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { Button } from "./components/DemoComponents";
 import { Icon } from "./components/DemoComponents";
-import { Home } from "./components/DemoComponents";
-import { Features } from "./components/DemoComponents";
 import { Translator } from "./components/Translator";
-// import { useAccount } from "wagmi";
 
 export default function App() {
   const { setFrameReady, isFrameReady, context } = useMiniKit();
   const [frameAdded, setFrameAdded] = useState(false);
   const [activeTab, setActiveTab] = useState("home");
-  // const { isConnected, address } = useAccount();
+  // const openUrl = useOpenUrl();
 
   const addFrame = useAddFrame();
-  const openUrl = useOpenUrl();
 
   useEffect(() => {
     if (!isFrameReady) {
@@ -76,7 +74,7 @@ export default function App() {
   return (
     <div className="flex flex-col min-h-screen font-sans text-[var(--app-foreground)] mini-app-theme from-[var(--app-background)] to-[var(--app-gray)]">
       <div className="w-full max-w-md mx-auto px-4 py-3">
-        <header className="flex justify-between items-center mb-3 h-11">
+        {/* <header className="flex justify-between items-center mb-3 h-11">
           <div>
             <div className="flex items-center space-x-2">
               <Wallet className="z-10">
@@ -84,7 +82,6 @@ export default function App() {
                   <Name className="text-inherit" />
                   <Avatar className="h-6 w-6" />
                 </ConnectWallet>
-                {/* {isConnected && <Address address={address} />} */}
                 <WalletDropdown>
                   <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
                     <Avatar />
@@ -98,17 +95,19 @@ export default function App() {
             </div>
           </div>
           <div>{saveFrameButton}</div>
-        </header>
+        </header> */}
 
         <main className="flex-1">
-          {activeTab === "home" && <Home setActiveTab={setActiveTab} />}
+          <Translator onBack={() => setActiveTab("home")} />
+
+          {/* {activeTab === "home" && <Home setActiveTab={setActiveTab} />}
           {activeTab === "features" && <Features setActiveTab={setActiveTab} />}
           {activeTab === "translator" && (
             <Translator onBack={() => setActiveTab("home")} />
-          )}
+          )} */}
         </main>
 
-        <footer className="mt-2 pt-4 flex justify-center">
+        {/* <footer className="mt-2 pt-4 flex justify-center">
           <Button
             variant="ghost"
             size="sm"
@@ -117,7 +116,7 @@ export default function App() {
           >
             Built on Base with MiniKit
           </Button>
-        </footer>
+        </footer> */}
       </div>
     </div>
   );

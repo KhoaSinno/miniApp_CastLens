@@ -88,9 +88,9 @@ export function Translator({ onBack }: TranslatorProps) {
         <h2 className="text-xl font-bold text-[var(--app-foreground)]">
           🌐 CastLens Translator
         </h2>
-        <Button variant="ghost" size="sm" onClick={onBack}>
+        {/* <Button variant="ghost" size="sm" onClick={onBack}>
           ← Back
-        </Button>
+        </Button> */}
       </div>
 
       {/* Mode Selection Card */}

@@ -16,6 +16,7 @@ import {
   TransactionStatus,
 } from "@coinbase/onchainkit/transaction";
 import { useNotification } from "@coinbase/onchainkit/minikit";
+import { Translator } from "./Translator";
 
 type ButtonProps = {
   children: ReactNode;
@@ -155,6 +156,7 @@ type HomeProps = {
 export function Home({ setActiveTab }: HomeProps) {
   return (
     <div className="space-y-6 animate-fade-in">
+      <Translator onBack={() => {}} />
       <Card title="🌐 CastLens Translator">
         <p className="text-[var(--app-foreground-muted)] mb-4">
           Translate and explain Farcaster content for Vietnamese users.
@@ -167,7 +169,7 @@ export function Home({ setActiveTab }: HomeProps) {
         </Button>
       </Card>
 
-      <Card title="My First Mini App">
+      <Card title="Sinoo's Mini App">
         <p className="text-[var(--app-foreground-muted)] mb-4">
           This is a minimalistic Mini App built with OnchainKit components.
         </p>
