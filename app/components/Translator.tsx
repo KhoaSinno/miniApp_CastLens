@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Button } from "./DemoComponents";
-import { fetchCastByHash } from "@/lib/neynar";
 
 interface TranslationResult {
   translated?: string;
@@ -52,7 +51,6 @@ function Card({
 }
 
 export function Translator({ onBack }: TranslatorProps) {
-  const [inputText, setInputText] = useState("");
   const [castHash, setCastHash] = useState("");
   const [result, setResult] = useState<Result>(null);
   const [loading, setLoading] = useState(false);
@@ -61,7 +59,8 @@ export function Translator({ onBack }: TranslatorProps) {
   const [mode, setMode] = useState<"translate" | "explain">("translate");
 
   const handleTranslate = async () => {
-    if (!inputText.trim()) return;
+    // require castHash (you were checking inputText)
+    if (!castHash.trim()) return;
 
     setLoading(true);
     try {
@@ -71,33 +70,46 @@ export function Translator({ onBack }: TranslatorProps) {
         body: JSON.stringify({ castHash: castHash.trim() }),
       });
 
+      const rawText = await castResponse.text();
+
+      // BAD RESPONSE
       if (!castResponse.ok) {
-        const errText = await castResponse.text();
-        console.error("Fetch cast failed:", castResponse.status, errText);
+        console.error("Fetch cast failed:", castResponse.status, rawText);
         setResult({ error: `Failed fetching cast: ${castResponse.status}` });
         return;
       }
-      
-      const data = await castResponse.json();
 
-      // set state and log the actual fetched value (not castRes which updates async)
-      const fetchedCast = data?.cast ?? JSON.stringify(data);
+      // try parse JSON fallback to rawText
+      let dataRes;
+      try {
+        dataRes = JSON.parse(rawText);
+      } catch {
+        dataRes = { cast: rawText };
+      }
+
+      console.log("Fetch cast response data:", dataRes.text);
+
+      const fetchedCast = dataRes?.cast ?? JSON.stringify(dataRes);
       setCastRes(fetchedCast);
-      console.log("Fetched Cast (raw response):", data);
-      console.log("Fetched Cast Content:", fetchedCast);
 
-      // const response = await fetch("/api/translate", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({
-      //     text: inputText,
-      //     mode,
-      //     targetLang: "vi",
-      //   }),
-      // });
+      console.log("Fetched Cast:", fetchedCast.text);
 
-      // const data = await response.json();
-      // setResult(data);
+      const response = await fetch("/api/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: dataRes.text,
+          mode,
+          targetLang: "vi",
+        }),
+      });
+
+      console.log("Translation API response status:", response);
+
+      const data = await response.json();
+      setResult(data);
+
+      // optional: call /api/translate here with fetchedCast...
     } catch (error) {
       console.error("Translation error:", error);
       setResult({ error: "Translation failed" });
