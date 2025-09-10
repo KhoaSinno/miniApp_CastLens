@@ -7,6 +7,7 @@ interface TranslateRequest {
   text: string;
   mode: "translate" | "explain";
   targetLang?: string;
+  imageUrls?: string[];
 }
 
 export async function POST(req: NextRequest) {
@@ -15,7 +16,12 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     console.log("Request body:", body);
 
-    const { text, mode, targetLang = "vi" }: TranslateRequest = body;
+    const {
+      text,
+      mode,
+      targetLang = "vi",
+      imageUrls = [],
+    }: TranslateRequest = body;
 
     if (!text?.trim()) {
       console.log("Error: Text is required");
@@ -35,7 +41,7 @@ export async function POST(req: NextRequest) {
     const result = await callGemini({
       mode,
       text: text.trim(),
-      imageUrls: [], // No images from MiniApp interface
+      imageUrls: imageUrls,
       targetLang,
     });
 

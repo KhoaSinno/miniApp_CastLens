@@ -21,8 +21,6 @@ interface ExplanationResult {
 
 type Result = TranslationResult | ExplanationResult | null;
 
-// Card component matching DemoComponents style
-
 export function Translator() {
   const [castHash, setCastHash] = useState("");
   const [result, setResult] = useState<Result>(null);
@@ -30,6 +28,10 @@ export function Translator() {
   const [mode, setMode] = useState<"translate" | "explain">("translate");
 
   const handleTranslate = async () => {
+    // Validate cast hash like - 0x671ea3b3a89c03af400a36d8470bf60cab482366
+    const castHashPattern = /^0x[a-fA-F0-9]{40}$/;
+    if (!castHashPattern.test(castHash.trim())) return;
+
     // require castHash (you were checking inputText)
     if (!castHash.trim()) return;
 
@@ -59,16 +61,29 @@ export function Translator() {
       }
 
       console.log("Fetch cast response data:", dataRes.text);
+      const imageUrls = [];
+      if (
+        dataRes?.embeds &&
+        Array.isArray(dataRes.embeds) &&
+        dataRes.embeds.length > 0
+      ) {
+        for (const embed of dataRes.embeds) {
+          imageUrls.push(embed.url);
+        }
+      }
+      console.log("Extracted image URLs:", imageUrls);
 
-      const fetchedCast = dataRes?.cast ?? JSON.stringify(dataRes);
-
-      console.log("Fetched Cast:", fetchedCast.text);
+      const geminiData =
+        (dataRes.text += `\n You have to read this image to understand and reply to user, Link related: {
+      URL: ${dataRes?.embeds?.[0]?.url}
+      }`);
 
       const response = await fetch("/api/translate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          text: dataRes.text,
+          text: geminiData,
+          imageUrls: imageUrls,
           mode,
           targetLang: "vi",
         }),
@@ -126,22 +141,22 @@ export function Translator() {
         </div>
       </Card>
 
-          <Button
-            onClick={handleTranslate}
-            // disabled={!inputText.trim() || loading}
-            className="w-full btn-gradient"
-          >
-            {loading ? (
-              <span className="flex items-center justify-center space-x-2">
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                <span>Processing...</span>
-              </span>
-            ) : mode === "translate" ? (
-              "Translate"
-            ) : (
-              "Explain"
-            )}
-          </Button>
+      <Button
+        onClick={handleTranslate}
+        disabled={!castHash.trim() || loading}
+        className="w-full btn-gradient"
+      >
+        {loading ? (
+          <span className="flex items-center justify-center space-x-2">
+            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            <span>Processing...</span>
+          </span>
+        ) : mode === "translate" ? (
+          "Translate"
+        ) : (
+          "Explain"
+        )}
+      </Button>
 
       {/* Result Card */}
       {result && (

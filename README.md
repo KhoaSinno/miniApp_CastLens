@@ -152,6 +152,14 @@ lib/
 - Pixel font integration with Pixelify Sans
 - Dark/light mode support through OnchainKit
 
+### Image size mini app
+
+- hero.png: 1200 x 630
+- icon.png: 1024 x 1024
+- logo.png: 84 x 84
+- screenshot.png: 1284 x 2778
+- splash.png: 200 x 200
+
 ### MiniKit Provider
 
 The app is wrapped with `MiniKitProvider` in `providers.tsx`, configured with:
