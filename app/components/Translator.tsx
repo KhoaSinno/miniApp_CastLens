@@ -112,11 +112,11 @@ export function Translator() {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in translator-theme translator-hero">
       {/* Header */}
       <div className="flex items-center justify-center mb-4">
-        <h2 className="text-xl font-bold text-[var(--app-foreground)]">
-          🌐 CastLens Translator
+        <h2 className="text-xl font-bold">
+          🌐 CastLens <span className="sparkle">Translator</span>
         </h2>
       </div>
 
@@ -128,7 +128,7 @@ export function Translator() {
             value={castHash}
             onChange={(e) => setCastHash(e.target.value)}
             placeholder="0x1d225d4dd118b2ba6a688e8b181b9aa57a396aa7"
-            className="w-full p-3 border border-[var(--app-card-border)] bg-[var(--app-background)] text-[var(--app-foreground)] rounded-lg focus:ring-2 focus:ring-[var(--app-accent)] focus:border-transparent"
+            className="w-full p-3 border border-[var(--app-card-border)] bg-[var(--app-background)] text-[var(--app-foreground)] rounded-lg focus:ring-2 focus:ring-[var(--app-accent)] focus:border-transparent glow-outline"
           />
         </div>
         <div className="grid grid-cols-2 gap-3">
@@ -151,7 +151,7 @@ export function Translator() {
 
       {/* Input Card */}
       <Card
-        title={mode === "translate" ? "Text to Translate" : "Text to Explain"}
+        title={mode === "translate" ? "Text Translated" : "Text Explained"}
       >
         <div className="space-y-4">
           {/* <textarea
@@ -169,7 +169,7 @@ export function Translator() {
           <Button
             onClick={handleTranslate}
             // disabled={!inputText.trim() || loading}
-            className="w-full"
+            className="w-full btn-gradient"
           >
             {loading ? (
               <span className="flex items-center justify-center space-x-2">
@@ -177,9 +177,9 @@ export function Translator() {
                 <span>Processing...</span>
               </span>
             ) : mode === "translate" ? (
-              "🔄 Translate"
+              "Translate"
             ) : (
-              "🤖 Explain"
+              "Explain"
             )}
           </Button>
         </div>

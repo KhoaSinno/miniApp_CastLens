@@ -119,6 +119,7 @@ body {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -128,10 +129,79 @@ body {
   0% {
     opacity: 1;
   }
+
   50% {
     opacity: 1;
   }
+
   100% {
     opacity: 0;
   }
+}
+
+/* Translator component color theme (hero palette: dark + indigo→cyan glow) */
+.translator-theme {
+  /* Core palette */
+  --app-background: #0B0F1A;
+  /* dark background */
+  --app-foreground: #FFFFFF;
+  /* main text */
+  --app-foreground-muted: rgba(255, 255, 255, 0.72);
+
+  /* Accent / glow */
+  --app-accent: #7B61FF;
+  /* indigo */
+  --app-accent-hover: #6a51f0;
+  --app-accent-active: #573fe0;
+  --app-accent-light: rgba(123, 97, 255, 0.12);
+  --app-accent-cyan: #00E5FF;
+  /* cyan */
+
+  /* Card and surfaces tuned for the dark hero */
+  --app-gray: rgba(255, 255, 255, 0.03);
+  --app-card-bg: rgba(11, 15, 26, 0.6);
+  --app-card-border: rgba(123, 97, 255, 0.14);
+}
+
+.translator-hero {
+  position: relative;
+  padding: 0.5rem;
+  background: linear-gradient(90deg, rgba(123, 97, 255, 0.04) 0%, rgba(0, 229, 255, 0.03) 60%), var(--app-background);
+  border-radius: 0.75rem;
+}
+
+/* soft indigo/cyan glow used for highlights and focused states */
+.translator-hero .glow-outline,
+.translator-hero input:focus,
+.translator-hero textarea:focus,
+.translator-hero button:focus {
+  box-shadow: 0 8px 30px rgba(123, 97, 255, 0.12), 0 16px 60px rgba(0, 229, 255, 0.06);
+}
+
+.translator-hero h2 {
+  background: linear-gradient(90deg, var(--app-accent), var(--app-accent-cyan));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.translator-hero .sparkle {
+  color: #FFFFFF;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.9);
+}
+
+.translator-hero input,
+.translator-hero textarea {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--app-card-border);
+  color: var(--app-foreground);
+}
+
+.translator-hero .card-accent {
+  border: 1px solid rgba(123, 97, 255, 0.08);
+}
+
+.translator-hero .btn-gradient {
+  background: linear-gradient(90deg, var(--app-accent), var(--app-accent-cyan));
+  color: #081120;
 }
