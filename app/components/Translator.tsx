@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "./DemoComponents";
+import { Button } from "./Button";
+import { Card } from "./Card";
 
 interface TranslationResult {
   translated?: string;
@@ -21,30 +22,6 @@ interface ExplanationResult {
 type Result = TranslationResult | ExplanationResult | null;
 
 // Card component matching DemoComponents style
-function Card({
-  title,
-  children,
-  className = "",
-}: {
-  title?: string;
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <div
-      className={`bg-[var(--app-card-bg)] backdrop-blur-md rounded-xl shadow-lg border border-[var(--app-card-border)] overflow-hidden transition-all hover:shadow-xl ${className}`}
-    >
-      {title && (
-        <div className="px-5 py-3 border-b border-[var(--app-card-border)]">
-          <h3 className="text-lg font-medium text-[var(--app-foreground)]">
-            {title}
-          </h3>
-        </div>
-      )}
-      <div className="p-5">{children}</div>
-    </div>
-  );
-}
 
 export function Translator() {
   const [castHash, setCastHash] = useState("");
@@ -149,23 +126,6 @@ export function Translator() {
         </div>
       </Card>
 
-      {/* Input Card */}
-      <Card
-        title={mode === "translate" ? "Text Translated" : "Text Explained"}
-      >
-        <div className="space-y-4">
-          {/* <textarea
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
-            placeholder={
-              mode === "translate"
-                ? "Enter text to translate to Vietnamese..."
-                : "Enter text to explain in simple terms..."
-            }
-            className="w-full p-3 border border-[var(--app-card-border)] bg-[var(--app-background)] text-[var(--app-foreground)] rounded-lg resize-none focus:ring-2 focus:ring-[var(--app-accent)] focus:border-transparent"
-            rows={4}
-          /> */}
-
           <Button
             onClick={handleTranslate}
             // disabled={!inputText.trim() || loading}
@@ -182,8 +142,6 @@ export function Translator() {
               "Explain"
             )}
           </Button>
-        </div>
-      </Card>
 
       {/* Result Card */}
       {result && (
@@ -208,7 +166,7 @@ export function Translator() {
                   {(result as TranslationResult).translated}
                 </div>
               )}
-              {(result as TranslationResult).notes?.length &&
+              {(result as TranslationResult).notes &&
                 (result as TranslationResult).notes!.length > 0 && (
                   <div className="text-sm text-[var(--app-foreground-muted)] bg-[var(--app-gray)] p-3 rounded-lg">
                     <strong>Notes:</strong>{" "}
