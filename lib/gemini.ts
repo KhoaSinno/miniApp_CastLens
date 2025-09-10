@@ -67,42 +67,33 @@ export async function callGemini({
   try {
     console.log("=== CallGemini function started ===");
     console.log("Parameters:", { mode, text, imageUrls, targetLang });
-    console.log("API Key check:", {
-      exists: !!process.env.GEMINI_API_KEY,
-      length: process.env.GEMINI_API_KEY?.length,
-      prefix: process.env.GEMINI_API_KEY?.substring(0, 10),
-    });
 
     if (!process.env.GEMINI_API_KEY) {
       throw new Error("GEMINI_API_KEY is not set");
     }
 
+    // Choose system instruction based on mode
     const systemInstruction =
       mode === "translate" ? translatePrompt : explainPrompt;
 
-    console.log("System instruction chosen:", mode);
-    console.log("Creating model...");
-
+    // Initialize Gemini model
     const model = genAI.getGenerativeModel({
       model: "gemini-1.5-flash",
       systemInstruction,
     });
 
-    console.log("Processing images...");
+    // Convert image URLs to inline images
     const imageParts = await Promise.all(
       imageUrls.slice(0, 3).map(urlToInlineImage),
     );
 
+    // Combine text and image parts
     const parts = [
       { text: JSON.stringify({ text, target_lang: targetLang, mode }) },
       ...imageParts,
     ];
 
-    console.log("Request parts:", parts.length, "parts total");
-    console.log("Text part:", parts[0]);
-
-    console.log("Calling Gemini API with retry...");
-
+    // Call Gemini with retry logic
     const result = await retryWithDelay(
       async () => {
         const resp = await model.generateContent({
@@ -114,18 +105,14 @@ export async function callGemini({
       1000,
     );
 
-    console.log("Gemini response received");
-    console.log("Response text length:", result.response.text()?.length);
-
+    // Get raw text response
     const responseText = result.response.text();
-    console.log("Raw response:", responseText);
 
     // Clean the response to remove markdown formatting
     const cleanedResponse = cleanJsonResponse(responseText);
-    console.log("Cleaned response:", cleanedResponse);
 
+    // Parse cleaned JSON
     const parsedResult = JSON.parse(cleanedResponse);
-    console.log("Parsed result:", parsedResult);
 
     return parsedResult;
   } catch (error) {

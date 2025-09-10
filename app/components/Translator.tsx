@@ -30,19 +30,27 @@ export function Translator() {
   const handleTranslate = async () => {
     // Validate cast hash like - 0x671ea3b3a89c03af400a36d8470bf60cab482366
     const castHashPattern = /^0x[a-fA-F0-9]{40}$/;
-    if (!castHashPattern.test(castHash.trim())) return;
+    if (!castHashPattern.test(castHash.trim())) {
+      setResult({ error: "Invalid cast hash format." });
+      return;
+    }
 
     // require castHash (you were checking inputText)
-    if (!castHash.trim()) return;
+    if (!castHash.trim()) {
+      setResult({ error: "Cast hash is required." });
+      return;
+    }
 
     setLoading(true);
     try {
+      // Call /api/fetch-cast to get cast text
       const castResponse = await fetch("/api/fetch-cast", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ castHash: castHash.trim() }),
       });
 
+      // Get raw text from response
       const rawText = await castResponse.text();
 
       // BAD RESPONSE
@@ -60,7 +68,8 @@ export function Translator() {
         dataRes = { cast: rawText };
       }
 
-      console.log("Fetch cast response data:", dataRes.text);
+      // console.log("Fetch cast response data:", dataRes.text);
+      // Extract image URLs if any
       const imageUrls = [];
       if (
         dataRes?.embeds &&
@@ -71,13 +80,15 @@ export function Translator() {
           imageUrls.push(embed.url);
         }
       }
-      console.log("Extracted image URLs:", imageUrls);
+      // console.log("Extracted image URLs:", imageUrls);
 
+      // Prepare text for translation/explanation
       const geminiData =
         (dataRes.text += `\n You have to read this image to understand and reply to user, Link related: {
       URL: ${dataRes?.embeds?.[0]?.url}
       }`);
 
+      // Call /api/translate with text and image URLs
       const response = await fetch("/api/translate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -89,12 +100,8 @@ export function Translator() {
         }),
       });
 
-      console.log("Translation API response status:", response);
-
       const data = await response.json();
       setResult(data);
-
-      // optional: call /api/translate here with fetchedCast...
     } catch (error) {
       console.error("Translation error:", error);
       setResult({ error: "Translation failed" });
@@ -213,7 +220,7 @@ export function Translator() {
                 </div>
               )}
 
-              {(result as ExplanationResult).key_points?.length &&
+              {(result as ExplanationResult).key_points &&
                 (result as ExplanationResult).key_points!.length > 0 && (
                   <div className="bg-[var(--app-background)] p-3 rounded-lg border border-[var(--app-card-border)]">
                     <strong className="text-sm text-[var(--app-accent)]">
@@ -229,7 +236,7 @@ export function Translator() {
                   </div>
                 )}
 
-              {(result as ExplanationResult).glossary?.length &&
+              {(result as ExplanationResult).glossary &&
                 (result as ExplanationResult).glossary!.length > 0 && (
                   <div className="bg-[var(--app-background)] p-3 rounded-lg border border-[var(--app-card-border)]">
                     <strong className="text-sm text-[var(--app-accent)]">

@@ -13,6 +13,6 @@ export function cleanJsonResponse(text: string): string {
   if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
     cleaned = cleaned.substring(firstBrace, lastBrace + 1);
   }
-
+  
   return cleaned;
 }
