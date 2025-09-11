@@ -101,8 +101,8 @@ export async function callGemini({
         });
         return resp;
       },
-      3,
-      1000,
+      5,
+      3000,
     );
 
     // Get raw text response

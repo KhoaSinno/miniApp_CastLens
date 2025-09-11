@@ -19,11 +19,13 @@ interface ExplanationResult {
   error?: string;
 }
 
-type Result = TranslationResult | ExplanationResult | null;
-
 export function Translator() {
   const [castHash, setCastHash] = useState("");
-  const [result, setResult] = useState<Result>(null);
+  const [translateResult, setTranslateResult] =
+    useState<TranslationResult | null>(null);
+  const [explainResult, setExplainResult] = useState<ExplanationResult | null>(
+    null,
+  );
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState<"translate" | "explain">("translate");
 
@@ -31,13 +33,15 @@ export function Translator() {
     // Validate cast hash like - 0x671ea3b3a89c03af400a36d8470bf60cab482366
     const castHashPattern = /^0x[a-fA-F0-9]{40}$/;
     if (!castHashPattern.test(castHash.trim())) {
-      setResult({ error: "Invalid cast hash format." });
+      setTranslateResult({ error: "Invalid cast hash format." });
+      setExplainResult({ error: "Invalid cast hash format." });
       return;
     }
 
     // require castHash (you were checking inputText)
     if (!castHash.trim()) {
-      setResult({ error: "Cast hash is required." });
+      setTranslateResult({ error: "Cast hash is required." });
+      setExplainResult({ error: "Cast hash is required." });
       return;
     }
 
@@ -56,7 +60,12 @@ export function Translator() {
       // BAD RESPONSE
       if (!castResponse.ok) {
         console.error("Fetch cast failed:", castResponse.status, rawText);
-        setResult({ error: `Failed fetching cast: ${castResponse.status}` });
+        setTranslateResult({
+          error: `Failed fetching cast: ${castResponse.status}`,
+        });
+        setExplainResult({
+          error: `Failed fetching cast: ${castResponse.status}`,
+        });
         return;
       }
 
@@ -83,17 +92,17 @@ export function Translator() {
       // console.log("Extracted image URLs:", imageUrls);
 
       // Prepare text for translation/explanation
-      const geminiData =
-        (dataRes.text += `\n You have to read this image to understand and reply to user, Link related: {
-      URL: ${dataRes?.embeds?.[0]?.url}
-      }`);
+      // const geminiData =
+      //   (dataRes.text += `\n You have to read this image to understand and reply to user, Link related: {
+      // URL: ${dataRes?.embeds?.[0]?.url}
+      // }`);
 
       // Call /api/translate with text and image URLs
       const response = await fetch("/api/translate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          text: geminiData,
+          text: dataRes?.text,
           imageUrls: imageUrls,
           mode,
           targetLang: "vi",
@@ -101,10 +110,13 @@ export function Translator() {
       });
 
       const data = await response.json();
-      setResult(data);
+
+      if (mode === "translate") setTranslateResult(data);
+      else setExplainResult(data);
     } catch (error) {
       console.error("Translation error:", error);
-      setResult({ error: "Translation failed" });
+      setTranslateResult({ error: "Translation failed" });
+      setExplainResult({ error: "Translation failed" });
     } finally {
       setLoading(false);
     }
@@ -166,68 +178,63 @@ export function Translator() {
       </Button>
 
       {/* Result Card */}
-      {result && (
-        <Card
-          title={
-            mode === "translate" ? "Translation Result" : "Explanation Result"
-          }
-        >
-          {result.error ? (
+      {(translateResult || explainResult) && (
+        <Card title="Translation Result">
+          {translateResult?.error ? (
             <div className="text-red-600 bg-red-50 p-3 rounded-lg">
-              <strong>Error:</strong> {result.error}
+              <strong>Error:</strong>{" "}
+              {translateResult?.error || explainResult?.error}
             </div>
-          ) : mode === "translate" ? (
+          ) : mode === "translate" && translateResult ? (
             <div className="space-y-3">
-              {(result as TranslationResult).unchanged ? (
+              {translateResult.unchanged ? (
                 <div className="text-[var(--app-foreground-muted)] italic bg-[var(--app-gray)] p-3 rounded-lg">
                   Text is already in Vietnamese or doesn&apos;t need
                   translation.
                 </div>
               ) : (
                 <div className="text-[var(--app-foreground)] bg-[var(--app-background)] p-3 rounded-lg border border-[var(--app-card-border)]">
-                  {(result as TranslationResult).translated}
+                  {translateResult.translated}
                 </div>
               )}
-              {(result as TranslationResult).notes &&
-                (result as TranslationResult).notes!.length > 0 && (
-                  <div className="text-sm text-[var(--app-foreground-muted)] bg-[var(--app-gray)] p-3 rounded-lg">
-                    <strong>Notes:</strong>{" "}
-                    {(result as TranslationResult).notes!.join(", ")}
-                  </div>
-                )}
+              {translateResult.notes && translateResult.notes!.length > 0 && (
+                <div className="text-sm text-[var(--app-foreground-muted)] bg-[var(--app-gray)] p-3 rounded-lg">
+                  <strong>Notes:</strong> {translateResult.notes!.join(", ")}
+                </div>
+              )}
             </div>
-          ) : (
+          ) : mode === "explain" && explainResult ? (
             <div className="space-y-4">
-              {(result as ExplanationResult).summary && (
+              {explainResult.summary && (
                 <div className="bg-[var(--app-background)] p-3 rounded-lg border border-[var(--app-card-border)]">
                   <strong className="text-sm text-[var(--app-accent)]">
                     Summary:
                   </strong>
                   <p className="text-[var(--app-foreground)] mt-1">
-                    {(result as ExplanationResult).summary}
+                    {explainResult.summary}
                   </p>
                 </div>
               )}
 
-              {(result as ExplanationResult).eli5 && (
+              {explainResult.eli5 && (
                 <div className="bg-[var(--app-background)] p-3 rounded-lg border border-[var(--app-card-border)]">
                   <strong className="text-sm text-[var(--app-accent)]">
                     ELI5:
                   </strong>
                   <p className="text-[var(--app-foreground)] mt-1">
-                    {(result as ExplanationResult).eli5}
+                    {explainResult.eli5}
                   </p>
                 </div>
               )}
 
-              {(result as ExplanationResult).key_points &&
-                (result as ExplanationResult).key_points!.length > 0 && (
+              {explainResult.key_points &&
+                explainResult.key_points!.length > 0 && (
                   <div className="bg-[var(--app-background)] p-3 rounded-lg border border-[var(--app-card-border)]">
                     <strong className="text-sm text-[var(--app-accent)]">
                       Key Points:
                     </strong>
                     <ul className="list-disc list-inside text-[var(--app-foreground)] space-y-1 mt-1">
-                      {(result as ExplanationResult).key_points!.map(
+                      {explainResult.key_points!.map(
                         (point: string, idx: number) => (
                           <li key={idx}>{point}</li>
                         ),
@@ -236,30 +243,27 @@ export function Translator() {
                   </div>
                 )}
 
-              {(result as ExplanationResult).glossary &&
-                (result as ExplanationResult).glossary!.length > 0 && (
-                  <div className="bg-[var(--app-background)] p-3 rounded-lg border border-[var(--app-card-border)]">
-                    <strong className="text-sm text-[var(--app-accent)]">
-                      Glossary:
-                    </strong>
-                    <div className="space-y-2 mt-1">
-                      {(result as ExplanationResult).glossary!.map(
-                        (item, idx: number) => (
-                          <div key={idx} className="text-sm">
-                            <strong className="text-[var(--app-foreground)]">
-                              {item.term}:
-                            </strong>{" "}
-                            <span className="text-[var(--app-foreground-muted)]">
-                              {item.meaning}
-                            </span>
-                          </div>
-                        ),
-                      )}
-                    </div>
+              {explainResult.glossary && explainResult.glossary!.length > 0 && (
+                <div className="bg-[var(--app-background)] p-3 rounded-lg border border-[var(--app-card-border)]">
+                  <strong className="text-sm text-[var(--app-accent)]">
+                    Glossary:
+                  </strong>
+                  <div className="space-y-2 mt-1">
+                    {explainResult.glossary!.map((item, idx: number) => (
+                      <div key={idx} className="text-sm">
+                        <strong className="text-[var(--app-foreground)]">
+                          {item.term}:
+                        </strong>{" "}
+                        <span className="text-[var(--app-foreground-muted)]">
+                          {item.meaning}
+                        </span>
+                      </div>
+                    ))}
                   </div>
-                )}
+                </div>
+              )}
             </div>
-          )}
+          ) : null}
         </Card>
       )}
     </div>
