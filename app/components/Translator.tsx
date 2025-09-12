@@ -27,7 +27,9 @@ export function Translator() {
     null,
   );
   const [loading, setLoading] = useState(false);
-  const [mode, setMode] = useState<"translate" | "explain">("translate");
+  const [mode, setMode] = useState<"translate" | "explain" | "chatbot">(
+    "translate",
+  );
 
   const handleTranslate = async () => {
     // Validate cast hash like - 0x671ea3b3a89c03af400a36d8470bf60cab482366
@@ -156,6 +158,15 @@ export function Translator() {
             className="w-full"
           >
             🤩 Explain (ELI5)
+          </Button>
+        </div>
+        <div className="mt-4">
+          <Button
+            variant={mode === "chatbot" ? "primary" : "outline"}
+            onClick={() => setMode("chatbot")}
+            className="w-full"
+          >
+            💬 Chat with chatbot (Soon)
           </Button>
         </div>
       </Card>

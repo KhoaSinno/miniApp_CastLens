@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { translatePrompt, explainPrompt } from "./prompts";
+import { translatePrompt, explainPrompt, chattingPrompt } from "./prompts";
 import { cleanJsonResponse } from "./json-utils";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
@@ -90,6 +90,79 @@ export async function callGemini({
     // Combine text and image parts
     const parts = [
       { text: JSON.stringify({ text, target_lang: targetLang, mode }) },
+      ...imageParts,
+    ];
+
+    // Call Gemini with retry logic
+    const result = await retryWithDelay(
+      async () => {
+        const resp = await model.generateContent({
+          contents: [{ role: "user", parts }],
+        });
+        return resp;
+      },
+      5,
+      3000,
+    );
+
+    // Get raw text response
+    const responseText = result.response.text();
+
+    // Clean the response to remove markdown formatting
+    const cleanedResponse = cleanJsonResponse(responseText);
+
+    // Parse cleaned JSON
+    const parsedResult = JSON.parse(cleanedResponse);
+
+    return parsedResult;
+  } catch (error) {
+    console.error("=== CallGemini error ===");
+    console.error("Error type:", error?.constructor?.name);
+    console.error(
+      "Error message:",
+      error instanceof Error ? error.message : error,
+    );
+    console.error(
+      "Error stack:",
+      error instanceof Error ? error.stack : "No stack",
+    );
+    throw error;
+  }
+}
+
+export async function chatting({
+  text,
+  imageUrls,
+  targetLang = "vi",
+}: {
+  text: string;
+  imageUrls: string[];
+  targetLang?: string;
+}) {
+  try {
+    console.log("=== CallGemini function started ===");
+    console.log("Parameters:", { text, imageUrls, targetLang });
+
+    if (!process.env.GEMINI_API_KEY) {
+      throw new Error("GEMINI_API_KEY is not set");
+    }
+
+    // Choose system instruction based on mode
+
+    // Initialize Gemini model
+    const model = genAI.getGenerativeModel({
+      model: "gemini-1.5-flash",
+      systemInstruction: chattingPrompt,
+    });
+
+    // Convert image URLs to inline images
+    const imageParts = await Promise.all(
+      imageUrls.slice(0, 3).map(urlToInlineImage),
+    );
+
+    // Combine text and image parts
+    const parts = [
+      { text: JSON.stringify({ text, target_lang: targetLang }) },
       ...imageParts,
     ];
 
