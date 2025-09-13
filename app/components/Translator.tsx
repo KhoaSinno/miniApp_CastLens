@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "./Button";
 import { Card } from "./Card";
 import ChatbotPanel from "./ChatbotPanel";
+import Image from "next/image";
 
 interface TranslationResult {
   translated?: string;
@@ -131,14 +132,21 @@ export function Translator() {
   return (
     <div className="space-y-6 animate-fade-in translator-theme translator-hero">
       {/* Header */}
-      <div className="flex items-center justify-center mb-4">
-        <h2 className="text-xl font-bold">
-          🌐 CastLens <span className="sparkle">Translator</span>
+      <div className="flex items-center mb-4">
+        <Image
+          src="/logo.png"
+          alt="CastLens logo"
+          width={60}
+          height={60}
+          className="rounded"
+        />
+        <h2 className="text-3xl font-bold">
+          CastLens <span className="sparkle text-xs">by Sinoo</span>
         </h2>
       </div>
 
       {/* Mode Selection Card */}
-      <Card title="Fetch Cast from Farcaster">
+      <Card title="Enter Cast hash from Farcaster">
         <div className="pb-3">
           <input
             type="text"
@@ -170,7 +178,7 @@ export function Translator() {
             onClick={() => setMode("chatbot")}
             className="w-full text-white"
           >
-            💬 Chat with chatbot
+            💬 Chat with CastLensBot
           </Button>
         </div>
       </Card>
