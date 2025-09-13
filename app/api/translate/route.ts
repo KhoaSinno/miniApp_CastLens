@@ -23,15 +23,29 @@ export async function POST(req: NextRequest) {
       imageUrls = [],
     }: TranslateRequest = body;
 
-    if (!text?.trim()) {
-      console.log("Error: Text is required");
-      return Response.json({ error: "Text is required" }, { status: 400 });
+    // Set default text based on mode if no text provided
+    let finalText = text;
+    if (!text?.trim() && imageUrls.length > 0) {
+      finalText =
+        mode === "explain"
+          ? "Explain what you see in these images in Vietnamese like I'm five."
+          : "Describe what you see in these images.";
+    } else if (!text?.trim()) {
+      finalText = "Explain this related url in Vietnamese like I'm five.";
+    }
+
+    if (mode === "translate") {
+      if (!finalText?.trim()) {
+        console.log("Error: Text is required");
+        return Response.json({ error: "Text is required" }, { status: 400 });
+      }
     }
 
     console.log("Calling Gemini with:", {
       mode,
-      text: text.trim(),
+      text: finalText.trim(),
       targetLang,
+      imageUrls: imageUrls.length,
     });
     console.log("Environment check:");
     console.log("- GEMINI_API_KEY exists:", !!process.env.GEMINI_API_KEY);
@@ -40,7 +54,7 @@ export async function POST(req: NextRequest) {
     // Call Gemini AI
     const result = await callGemini({
       mode,
-      text: text.trim(),
+      text: finalText.trim(),
       imageUrls: imageUrls,
       targetLang,
     });

@@ -107,12 +107,44 @@ export async function callGemini({
 
     // Get raw text response
     const responseText = result.response.text();
+    console.log("Raw Gemini response:", responseText);
 
     // Clean the response to remove markdown formatting
     const cleanedResponse = cleanJsonResponse(responseText);
+    console.log("Cleaned response:", cleanedResponse);
 
-    // Parse cleaned JSON
-    const parsedResult = JSON.parse(cleanedResponse);
+    // Parse cleaned JSON with fallback
+    let parsedResult;
+    try {
+      parsedResult = JSON.parse(cleanedResponse);
+    } catch (parseError) {
+      console.error(
+        "JSON parse failed, falling back to plain text:",
+        parseError,
+      );
+      // Fallback: wrap plain text in expected format based on mode
+      if (mode === "translate") {
+        parsedResult = {
+          source_lang: "auto",
+          target_lang: targetLang,
+          unchanged: false,
+          translated: cleanedResponse,
+          notes: [],
+        };
+      } else {
+        parsedResult = {
+          source_lang: "auto",
+          target_lang: targetLang,
+          summary: cleanedResponse,
+          eli5: cleanedResponse,
+          key_points: [cleanedResponse],
+          glossary: [],
+          examples: [],
+          suggested_reply: "",
+          limits: [],
+        };
+      }
+    }
 
     return parsedResult;
   } catch (error) {
@@ -187,12 +219,24 @@ export async function chatting({
 
     // Get raw text response
     const responseText = result.response.text();
+    console.log("Raw Gemini response:", responseText);
 
     // Clean the response to remove markdown formatting
     const cleanedResponse = cleanJsonResponse(responseText);
+    console.log("Cleaned response:", cleanedResponse);
 
-    // Parse cleaned JSON
-    const parsedResult = JSON.parse(cleanedResponse);
+    // Parse cleaned JSON with fallback
+    let parsedResult;
+    try {
+      parsedResult = JSON.parse(cleanedResponse);
+    } catch (parseError) {
+      console.error(
+        "JSON parse failed, falling back to plain text:",
+        parseError,
+      );
+      // Fallback: wrap plain text in expected format
+      parsedResult = { content: cleanedResponse };
+    }
 
     return parsedResult;
   } catch (error) {

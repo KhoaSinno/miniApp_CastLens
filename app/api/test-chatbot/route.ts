@@ -10,7 +10,7 @@ export async function GET() {
       { role: "assistant", content: "Hello! How can I help you?" },
     ],
   };
-  const base = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  const base = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
   const data = await fetch(`${base}/api/chatbot`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

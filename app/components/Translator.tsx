@@ -20,6 +20,8 @@ interface ExplanationResult {
   error?: string;
 }
 
+const baseUrl = process.env.NEXT_PUBLIC_URL;
+
 export function Translator() {
   const [castHash, setCastHash] = useState("");
   const [translateResult, setTranslateResult] =
@@ -51,7 +53,7 @@ export function Translator() {
     setLoading(true);
     try {
       // Call /api/fetch-cast to get cast text
-      const castResponse = await fetch("/api/fetch-cast", {
+      const castResponse = await fetch(`${baseUrl}/api/fetch-cast`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ castHash: castHash.trim() }),
@@ -101,7 +103,8 @@ export function Translator() {
       // }`);
 
       // Call /api/translate with text and image URLs
-      const response = await fetch("/api/translate", {
+
+      const response = await fetch(`${baseUrl}/api/translate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -165,9 +168,9 @@ export function Translator() {
           <Button
             variant={mode === "chatbot" ? "primary" : "outline"}
             onClick={() => setMode("chatbot")}
-            className="w-full"
+            className="w-full text-white"
           >
-            💬 Chat with chatbot (Soon)
+            💬 Chat with chatbot
           </Button>
         </div>
       </Card>

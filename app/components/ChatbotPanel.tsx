@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Button } from "./Button";
+import TypingBubble from "./TypingBubble";
 
 type Turn = { role: "user" | "assistant"; content: string };
 
@@ -117,6 +118,8 @@ export default function ChatbotPanel({ castHash }: { castHash: string }) {
             </div>
           </div>
         ))}
+
+        {sending && <TypingBubble />}
       </div>
 
       <div className="mt-3 space-y-2">
@@ -131,9 +134,9 @@ export default function ChatbotPanel({ castHash }: { castHash: string }) {
           <Button
             onClick={sendMessage}
             disabled={sending}
-            className="btn-gradient"
+            className="btn-gradient text-white"
           >
-            {sending ? "Đang trả lời…" : "Gửi"}
+            {sending ? "Responding…" : "Send"}
           </Button>
         </div>
       </div>

@@ -25,7 +25,7 @@ export async function POST(req: Request) {
   }
 
   // Fetch cast data
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  const baseUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
   const castResponse = await fetch(`${baseUrl}/api/fetch-cast`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -51,8 +51,13 @@ export async function POST(req: Request) {
     }
   }
 
+  const castText = castData?.text || "This cast just have images.";
+
+  // Combine user input with the cast text so the model has full context
+  const combinedText = `USER_INPUT:\n${input}\n\nCAST_CONTENT:\n${castText}`;
+
   const data = await chatting({
-    text: input,
+    text: combinedText,
     imageUrls,
     history: history ?? [],
     targetLang: "vi",
