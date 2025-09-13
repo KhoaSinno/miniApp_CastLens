@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "./Button";
 import { Card } from "./Card";
+import ChatbotPanel from "./ChatbotPanel";
 
 interface TranslationResult {
   translated?: string;
@@ -171,27 +172,32 @@ export function Translator() {
         </div>
       </Card>
 
-      <Button
-        onClick={handleTranslate}
-        disabled={!castHash.trim() || loading}
-        className="w-full btn-gradient"
-      >
-        {loading ? (
-          <span className="flex items-center justify-center space-x-2">
-            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-            <span>Processing...</span>
-          </span>
-        ) : mode === "translate" ? (
-          "Translate"
-        ) : (
-          "Explain"
-        )}
-      </Button>
+      {mode !== "chatbot" && (
+        <Button
+          onClick={handleTranslate}
+          disabled={!castHash.trim() || loading}
+          className="w-full btn-gradient"
+        >
+          {loading ? (
+            <span className="flex items-center justify-center space-x-2">
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              <span>Processing...</span>
+            </span>
+          ) : mode === "translate" ? (
+            "Translate"
+          ) : (
+            "Explain"
+          )}
+        </Button>
+      )}
 
       {/* Result Card */}
-      {(translateResult || explainResult) && (
-        <Card title="Translation Result">
-          {translateResult?.error ? (
+      {((mode !== "chatbot" && (translateResult || explainResult)) ||
+        mode === "chatbot") && (
+        <Card title={mode === "chatbot" ? "💬 Chatbot" : "Translation Result"}>
+          {mode === "chatbot" ? (
+            <ChatbotPanel castHash={castHash} />
+          ) : translateResult?.error || explainResult?.error ? (
             <div className="text-red-600 bg-red-50 p-3 rounded-lg">
               <strong>Error:</strong>{" "}
               {translateResult?.error || explainResult?.error}

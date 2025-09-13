@@ -133,10 +133,12 @@ export async function callGemini({
 export async function chatting({
   text,
   imageUrls,
+  history,
   targetLang = "vi",
 }: {
   text: string;
   imageUrls: string[];
+  history: Array<{ role: "user" | "assistant"; content: string }>;
   targetLang?: string;
 }) {
   try {
@@ -146,8 +148,6 @@ export async function chatting({
     if (!process.env.GEMINI_API_KEY) {
       throw new Error("GEMINI_API_KEY is not set");
     }
-
-    // Choose system instruction based on mode
 
     // Initialize Gemini model
     const model = genAI.getGenerativeModel({
@@ -166,11 +166,18 @@ export async function chatting({
       ...imageParts,
     ];
 
+    // Prepare content for genAI - map history entries to the required Content shape
+    const mappedHistory = history.map((h) => ({
+      role: h.role,
+      parts: [{ text: h.content }],
+    }));
+    const contents = [...mappedHistory, { role: "user", parts }];
+
     // Call Gemini with retry logic
     const result = await retryWithDelay(
       async () => {
         const resp = await model.generateContent({
-          contents: [{ role: "user", parts }],
+          contents,
         });
         return resp;
       },

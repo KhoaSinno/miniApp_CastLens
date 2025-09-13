@@ -12,7 +12,6 @@ interface ChatRequest {
 
 export async function POST(req: Request) {
   const { castHash, input, history }: ChatRequest = await req.json();
-  console.log("History:", history);
 
   // Validation
   const castHashPattern = /^0x[a-fA-F0-9]{40}$/;
@@ -24,9 +23,9 @@ export async function POST(req: Request) {
   if (!input || !input.trim()) {
     return new Response("Input text is required", { status: 400 });
   }
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
   // Fetch cast data
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
   const castResponse = await fetch(`${baseUrl}/api/fetch-cast`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -38,10 +37,9 @@ export async function POST(req: Request) {
   }
 
   const castData = await castResponse.json();
+  // console.log("Fetched Cast Data:", castData);
 
-  console.log("Fetched Cast Data:", castData);
-
-  // Package parts to for LLM
+  // Validate image URLs for LLM
   const imageUrls = [];
   if (
     castData?.embeds &&
@@ -53,7 +51,12 @@ export async function POST(req: Request) {
     }
   }
 
-  const data = await chatting({ text: input, imageUrls, targetLang: "vi" });
+  const data = await chatting({
+    text: input,
+    imageUrls,
+    history: history ?? [],
+    targetLang: "vi",
+  });
 
   return new Response(JSON.stringify({ content: data.content }), {
     status: 200,
